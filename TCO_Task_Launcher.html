@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TCO Task Launcher</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #0D7377;
+    --teal-dark: #095457;
+    --teal-light: #E8F7F7;
+    --teal-mid: #14BDBD;
+    --gold: #C9A84C;
+    --white: #FFFFFF;
+    --gray: #4A4A4A;
+    --gray-light: #F5F5F5;
+    --shadow: 0 8px 32px rgba(13,115,119,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(145deg, #0a4a4d 0%, #0D7377 50%, #0a8a8f 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* Decorative background circles */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -100px;
+    right: -100px;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -80px;
+    left: -80px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+    pointer-events: none;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .logo-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 28px;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: white;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.6s ease 0.15s both;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 10px;
+  }
+
+  /* Project selector */
+  .project-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .project-btn {
+    background: var(--gray-light);
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 12px 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .project-btn:active { transform: scale(0.97); }
+
+  .project-btn.selected {
+    background: var(--teal-light);
+    border-color: var(--teal);
+  }
+
+  .project-btn .icon {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .project-btn .name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray);
+    line-height: 1.3;
+  }
+
+  .project-btn.selected .name { color: var(--teal-dark); }
+
+  /* Task input */
+  .task-wrap {
+    margin-bottom: 24px;
+  }
+
+  .task-input {
+    width: 100%;
+    border: 2px solid #E8E8E8;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--gray);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 90px;
+    line-height: 1.5;
+  }
+
+  .task-input:focus { border-color: var(--teal); }
+  .task-input::placeholder { color: #BBBBBB; }
+
+  /* Notes input */
+  .notes-wrap { margin-bottom: 28px; }
+
+  .notes-input {
+    width: 100%;
+    border: 2px solid #E8E8E8;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 60px;
+    line-height: 1.5;
+  }
+
+  .notes-input:focus { border-color: var(--teal); }
+  .notes-input::placeholder { color: #BBBBBB; }
+
+  /* Launch button */
+  .launch-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 17px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 16px rgba(13,115,119,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .launch-btn:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(13,115,119,0.25); }
+  .launch-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* Success state */
+  .success-bar {
+    display: none;
+    background: var(--teal-light);
+    border: 1.5px solid var(--teal-mid);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--teal-dark);
+    font-weight: 500;
+    text-align: center;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .success-bar.show { display: block; }
+
+  /* Selected project display */
+  .selected-display {
+    display: none;
+    background: var(--teal-light);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--teal-dark);
+    font-weight: 500;
+    margin-bottom: 16px;
+    align-items: center;
+    gap: 6px;
+  }
+  .selected-display.show { display: flex; }
+
+  .divider {
+    height: 1px;
+    background: #F0F0F0;
+    margin: 20px 0;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .footer-note {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.05em;
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-ring">👁️</div>
+  <h1>TCO Task Launcher</h1>
+  <p>Traverse City Ophthalmology</p>
+</div>
+
+<div class="card">
+
+  <div class="section-label">Select Project</div>
+  <div class="project-grid" id="projectGrid">
+    <button class="project-btn" onclick="selectProject(this)" data-email="gax5trurh8+m1ut0+taouc@in.meistertask.com" data-name="Board Meeting">
+      <span class="icon">🏛️</span>
+      <span class="name">Board Meeting</span>
+    </button>
+    <button class="project-btn" onclick="selectProject(this)" data-email="m2a5u0q27m+faszs+taouc@in.meistertask.com" data-name="Managers Meeting">
+      <span class="icon">👥</span>
+      <span class="name">Managers Meeting</span>
+    </button>
+    <button class="project-btn" onclick="selectProject(this)" data-email="qhg9833zek+fdixi+taouc@in.meistertask.com" data-name="1:1 with Jodie">
+      <span class="icon">🤝</span>
+      <span class="name">1:1 with Jodie</span>
+    </button>
+    <button class="project-btn" onclick="selectProject(this)" data-email="neopq1heaw+gl9cj+taouc@in.meistertask.com" data-name="All Staff Meeting">
+      <span class="icon">🚀</span>
+      <span class="name">All Staff Meeting</span>
+    </button>
+    <button class="project-btn" onclick="selectProject(this)" data-email="6qau2cjobp+j1bcd+taouc@in.meistertask.com" data-name="Surgery Center">
+      <span class="icon">🏥</span>
+      <span class="name">Surgery Center</span>
+    </button>
+    <button class="project-btn" onclick="selectProject(this)" data-email="apoyatabl7+l0k01+taouc@in.meistertask.com" data-name="Financial Ops">
+      <span class="icon">💰</span>
+      <span class="name">Financial Ops</span>
+    </button>
+    <button class="project-btn" onclick="selectProject(this)" data-email="7g29hrjcjq+ln6p0+taouc@in.meistertask.com" data-name="Phil Biweekly">
+      <span class="icon">📊</span>
+      <span class="name">Phil Biweekly</span>
+    </button>
+    <button class="project-btn" onclick="selectProject(this)" data-email="fo3zmafuxd+m6tbh+taouc@in.meistertask.com" data-name="Agnite Lunch">
+      <span class="icon">🧾</span>
+      <span class="name">Agnite Lunch</span>
+    </button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="task-wrap">
+    <div class="section-label">Task / Agenda Item</div>
+    <textarea class="task-input" id="taskInput" placeholder="e.g. Equipment list that needs repair…" rows="3"></textarea>
+  </div>
+
+  <div class="notes-wrap">
+    <div class="section-label">Notes (optional)</div>
+    <textarea class="notes-input" id="notesInput" placeholder="Any additional context or details…" rows="2"></textarea>
+  </div>
+
+  <button class="launch-btn" id="launchBtn" onclick="launchEmail()" disabled>
+    <span>✉️</span> Open in Mail & Send
+  </button>
+
+  <div class="success-bar" id="successBar">
+    ✅ Mail app opened! Hit Send to add to MeisterTask.
+  </div>
+
+</div>
+
+<div class="footer-note">Dr. Alicia Eby · TCO · Traverse City, MI</div>
+
+<script>
+  let selectedEmail = null;
+  let selectedName = null;
+
+  function selectProject(btn) {
+    document.querySelectorAll('.project-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedEmail = btn.dataset.email;
+    selectedName = btn.dataset.name;
+    checkReady();
+  }
+
+  document.getElementById('taskInput').addEventListener('input', checkReady);
+
+  function checkReady() {
+    const hasProject = !!selectedEmail;
+    const hasTask = document.getElementById('taskInput').value.trim().length > 0;
+    document.getElementById('launchBtn').disabled = !(hasProject && hasTask);
+  }
+
+  function launchEmail() {
+    const task = document.getElementById('taskInput').value.trim();
+    const notes = document.getElementById('notesInput').value.trim();
+    const subject = encodeURIComponent(task);
+    const body = encodeURIComponent(notes || task);
+    const mailto = `mailto:${selectedEmail}?subject=${subject}&body=${body}`;
+    window.location.href = mailto;
+
+    // Show success bar
+    const bar = document.getElementById('successBar');
+    bar.classList.add('show');
+    setTimeout(() => bar.classList.remove('show'), 4000);
+
+    // Reset after short delay
+    setTimeout(() => {
+      document.querySelectorAll('.project-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('taskInput').value = '';
+      document.getElementById('notesInput').value = '';
+      selectedEmail = null;
+      selectedName = null;
+      document.getElementById('launchBtn').disabled = true;
+    }, 1500);
+  }
+</script>
+</body>
+</html>
